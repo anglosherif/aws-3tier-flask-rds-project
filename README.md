@@ -14,6 +14,17 @@ as you can see in this setup , there is a public subnet and a private subnet .. 
 finally there is a backup subnet which was needed as the RDS DB needed another subnet in differenet AZ for backup puposes .
 the routing table was configured for each subnet . also at the end we can see internet gateway configured which is responsible for exposing the VPC to the internet . the vpc has CIDR 10.0.0.0/16
 
+security groups is configured on each ec2 and on the DB layer 
+
+Internet
+   ↓
+Public EC2 (app entry)
+   ↓ (SSH / App traffic)
+Private EC2 (Flask)
+   ↓ (3306 MySQL)
+RDS MySQL
+
+
 <img width="1911" height="784" alt="image - 2026-02-16T135343 575" src="https://github.com/user-attachments/assets/c56eac79-3ff1-449c-9074-c6b3c9080275" />
 
 
@@ -62,3 +73,16 @@ Configuring the application tier is quite similar to the web tier, but there are
 and also allow writing to the RDS DB 
 <img width="1573" height="492" alt="image" src="https://github.com/user-attachments/assets/1db7e90c-fae6-4bd9-9e36-4fee5c54a482" />
 <img width="1508" height="402" alt="image" src="https://github.com/user-attachments/assets/4327c123-dfdc-4d49-be26-52f725c7eae5" />
+
+but the issue is that how to configure all needed packages inside an ec2 instance that is not connected to internet ! , the solution was that i hade to install all needed packages inside the public ec2 and then transfer them to the private ec2 and finally i can do the install for the packages .
+
+for example , here is s the steps to install mysql-connector-python on the private ec2 :-
+1) on plublic ec2
+   pip3 download mysql-connector-python -d mysql-offline
+   scp -i ~/ec2-3tier.pem -r mysql-offline ec2-user@10.0.2.230:~
+2) on private ec2
+   mkdir mysql-offline
+   cd mysql-offline
+   pip3 install --no-index --find-links=. mysql-connector-python
+
+this way is used to install any package needed in the private EC2 instance and this method is called Air-gapped installation
