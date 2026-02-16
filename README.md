@@ -220,4 +220,11 @@ the inbound security group is allowed only from the private ec2
 
 <img width="1868" height="1011" alt="image - 2026-02-16T174013 171" src="https://github.com/user-attachments/assets/94f6b9f9-6c86-4036-a119-8b68e2b8af5e" />
 
+**5- test** 
 
+now lets test if all is working 
+
+<img width="1291" height="739" alt="image" src="https://github.com/user-attachments/assets/461a7c7f-9c70-4c0a-a3be-88ee92404cf0" />
+
+as we can see app is connecting to database , it can write and read successfully .
+this shows that the 3 layers are connected together 
