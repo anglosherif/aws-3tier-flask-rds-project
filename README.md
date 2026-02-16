@@ -86,3 +86,123 @@ for example , here is s the steps to install mysql-connector-python on the priva
    pip3 install --no-index --find-links=. mysql-connector-python
 
 this way is used to install any package needed in the private EC2 instance and this method is called Air-gapped installation
+
+now lets see the application code 
+
+from flask import Flask, jsonify
+import mysql.connector
+from mysql.connector import Error
+
+app = Flask(__name__)
+
+# ------------------------
+# RDS Database Configuration
+# ------------------------
+DB_HOST = "database-3tier.c4hossiaq227.us-east-1.rds.amazonaws.com"
+DB_USER = "admin"
+DB_PASSWORD = "Welcome123$"
+DB_NAME = "three_tier_app"
+DB_PORT = 3306
+# ------------------------
+
+def get_connection(database=None):
+    return mysql.connector.connect(
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=database,
+        port=DB_PORT
+    )
+
+# ------------------------
+# Initialize Database + Table
+# ------------------------
+@app.route("/init")
+def initialize_database():
+    try:
+        connection = get_connection()
+        cursor = connection.cursor()
+
+        cursor.execute("CREATE DATABASE IF NOT EXISTS three_tier_app;")
+        cursor.execute("USE three_tier_app;")
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(100),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
+
+        return "✅ Database and table created successfully!"
+
+    except Error as e:
+        return f"❌ Error: {e}"
+    finally:
+        if 'connection' in locals() and connection.is_connected():
+            cursor.close()
+            connection.close()
+
+# ------------------------
+# Home Route
+# ------------------------
+@app.route("/")
+def home():
+    return "🚀 3-Tier App is Working from Private EC2!"
+
+# ------------------------
+# Add User
+# ------------------------
+@app.route("/add/<name>")
+def add_user(name):
+    try:
+        connection = get_connection(DB_NAME)
+        cursor = connection.cursor()
+
+        cursor.execute("INSERT INTO users (name) VALUES (%s)", (name,))
+        connection.commit()
+
+        return f"✅ User '{name}' added successfully!"
+
+    except Error as e:
+        return f"❌ Error: {e}"
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+# ------------------------
+# List Users
+# ------------------------
+@app.route("/users")
+def list_users():
+    try:
+        connection = get_connection(DB_NAME)
+        cursor = connection.cursor()
+
+        cursor.execute("SELECT * FROM users;")
+        records = cursor.fetchall()
+
+        users = []
+        for row in records:
+            users.append({
+                "id": row[0],
+                "name": row[1],
+                "created_at": str(row[2])
+            })
+
+        return jsonify(users)
+
+    except Error as e:
+        return f"❌ Error: {e}"
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+# ------------------------
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
+
+
+app.py file is the backend application of the 3-tier architecture. It uses Flask to create a small web server that runs on the private EC2 instance and listens on port 5000. When someone accesses the root URL (/), it simply returns a message confirming that the application server is running. When someone accesses the /db route, the application attempts to connect to the Amazon RDS MySQL database using the configured host, username, and password. If the connection is successful, it confirms that the app can communicate with the database; if not, it returns an error message. In short, app.py acts as the application layer between the user and the database, proving that networking, security groups, and database integration in the 3-tier architecture are working correctly.
