@@ -212,6 +212,7 @@ the following pic shows how to run the app :-
 
 
 **4- DB tier**
+
 while creating the DB , i faced an error , the rds DB refused to be created as the i have only 2 subnets and both are created in one az .. rds has to have a backup az in the setup .
 so , i created another subnet and configured it in another az .
 only then the RDS DB is now created .
