@@ -58,4 +58,7 @@ now once we access the public ip of the EC2 we can see the welcome nginx page .
 
 **3- app tier**
 
-Configuring the application tier is quite similar to the web tier, but there are some important differences. You’ll need to create a new security group, app-sg, which allows SSH access only from the web tier and opens port 5000 for the Flask application.
+Configuring the application tier is quite similar to the web tier, but there are some important differences. You’ll need to create a new security group, app-sg, which allows SSH access only from the web tier and opens TCP port 5000 for the Flask application.
+and also allow writing to the RDS DB 
+<img width="1573" height="492" alt="image" src="https://github.com/user-attachments/assets/1db7e90c-fae6-4bd9-9e36-4fee5c54a482" />
+<img width="1508" height="402" alt="image" src="https://github.com/user-attachments/assets/4327c123-dfdc-4d49-be26-52f725c7eae5" />
