@@ -89,22 +89,21 @@ this way is used to install any package needed in the private EC2 instance and t
 
 now lets see the application code 
 
+
+
 from flask import Flask, jsonify
 import mysql.connector
 from mysql.connector import Error
-
 app = Flask(__name__)
-
 # ------------------------
 # RDS Database Configuration
 # ------------------------
 DB_HOST = "database-3tier.c4hossiaq227.us-east-1.rds.amazonaws.com"
 DB_USER = "admin"
-DB_PASSWORD = "Welcome123$"
+DB_PASSWORD = "Password :D"
 DB_NAME = "three_tier_app"
 DB_PORT = 3306
 # ------------------------
-
 def get_connection(database=None):
     return mysql.connector.connect(
         host=DB_HOST,
@@ -205,4 +204,19 @@ if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
 
 
+
 app.py file is the backend application of the 3-tier architecture. It uses Flask to create a small web server that runs on the private EC2 instance and listens on port 5000. When someone accesses the root URL (/), it simply returns a message confirming that the application server is running. When someone accesses the /db route, the application attempts to connect to the Amazon RDS MySQL database using the configured host, username, and password. If the connection is successful, it confirms that the app can communicate with the database; if not, it returns an error message. In short, app.py acts as the application layer between the user and the database, proving that networking, security groups, and database integration in the 3-tier architecture are working correctly.
+
+the following pic shows how to run the app :-
+<img width="1096" height="532" alt="image" src="https://github.com/user-attachments/assets/f5c2878e-5d89-4c38-87b4-d82bb6b4e6be" />
+
+
+**4- DB tier**
+while creating the DB , i faced an error , the rds DB refused to be created as the i have only 2 subnets and both are created in one az .. rds has to have a backup az in the setup .
+so , i created another subnet and configured it in another az .
+only then the RDS DB is now created .
+the inbound security group is allowed only from the private ec2
+
+<img width="1868" height="1011" alt="image - 2026-02-16T174013 171" src="https://github.com/user-attachments/assets/94f6b9f9-6c86-4036-a119-8b68e2b8af5e" />
+
+
